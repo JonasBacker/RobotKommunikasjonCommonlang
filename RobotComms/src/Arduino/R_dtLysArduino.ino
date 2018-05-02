@@ -22,18 +22,23 @@ const char* ssid = "MagnusSugeIMarioCart";
 const char* password = "atiganger";
 const char* mqtt_server = "192.168.1.4";
 const char* tilEV3 = "tilEV3";
+const char* tilPc = "tilPc";
 const char* go = "go";
+const char* found = "found";
 const char* stopp = "stop";
 const char* loss = "loss";
+//char* widthdiff;
 int x = 0;
 int width = 0; // ev3 block width
 int widthTemp = 0;
+int count = 0;
+bool movement = false;
 
 
 void turnRight(int degrees) {
   servoLeft.writeMicroseconds(1547);
   servoRight.writeMicroseconds(1547);
-  delay(degrees * 11);
+  delay(degrees * 12);
   servoLeft.writeMicroseconds(1500);
   servoRight.writeMicroseconds(1495);
   delay(5);
@@ -42,7 +47,7 @@ void turnRight(int degrees) {
 void turnLeft(int degrees) {
   servoLeft.writeMicroseconds(1453);
   servoRight.writeMicroseconds(1453);
-  delay(degrees * 11);
+  delay(degrees * 12);
   servoLeft.writeMicroseconds(1500);
   servoRight.writeMicroseconds(1495);
   delay(5);
@@ -133,7 +138,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if (receivedChar == '0') {
       started = false;
     }
-
   }
 
 }
@@ -165,12 +169,11 @@ void loop() {
       turnRight(190);
     }
     client.loop();
-    client.publish(tilEV3, go);
-    client.loop();
     delay(3000);
     client.loop();
+    
     if (started) {
-
+      
       // snu seg mot ev3
       turnRight(100);
       digitalWrite(D8, HIGH);
@@ -187,18 +190,32 @@ void loop() {
         Serial.println(x);
       }
 
-      // sjekk for bevegelse
-      getBlockData();      // Hent width
-      widthTemp = width;   // Lage width i en temp variabel
-      delay(2000);
-      getBlockData();      // Hent ny width
-      if (width - widthTemp > 20) {
-        client.publish(tilEV3, loss);
+      // send "found" til EV3
+      client.publish(tilEV3, found);
+
+      // Sjekk for bevegelse
+      while (count < 8 && started && !movement){
+        getBlockData();      // Hent width
+        widthTemp = width;   // Lage width i en temp variabel
+        delay(1000);
+        getBlockData();      // Hent ny width
+        //sprintf(widthdiff, "%d", (width - widthTemp));
+        //client.publish(tilPc, widthdiff);
+        Serial.println((width - widthTemp));
+        if (width - widthTemp > 3) {
+          client.publish(tilEV3, loss);
+          started = false;
+          movement = true;
+        }
+        count++;
       }
 
-      // Reset x
-      x = 0;
+      
 
+      // Reset variables
+      x = 0;
+      movement = false;
+      count = 0;
     }
 
     client.loop();

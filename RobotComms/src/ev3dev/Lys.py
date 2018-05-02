@@ -6,7 +6,6 @@ import paho.mqtt.client as mqtt
 
 previousSonicRead = 0
 previousSonicRead2 = 0
-stopped = False
 sonicDiff = 0
 count = 0
 
@@ -18,6 +17,8 @@ def setup():
     global seeingRight
     global seeingLeft
     global client
+    global stopped
+    global found
     rightMotor = ev3.LargeMotor('outA')
     leftMotor = ev3.LargeMotor('outB')
     rightMotor.reset()
@@ -26,6 +27,8 @@ def setup():
     touchingRight = False
     seeingRight = 0
     seeingLeft = 0
+    stopped = False
+    found = False
     
     client = mqtt.Client()
     client.connect("192.168.1.4",1883,60)
@@ -36,25 +39,28 @@ def setup():
 def loop():
     global previousSonicRead
     global previousSonicRead2
-    global stopped
     global sonicDiff
     global count
+    global stopped
+    global found
     while True:
         client.loop()
         ReadSensors()
         previousSonicRead2 = previousSonicRead
         previousSonicRead = ((seeingLeft+seeingRight)/2)
         _sleep(0.5)
-        client.publish("tilPc", (seeingLeft+seeingRight/2))
-        if stopped:
+        if stopped and found:
             count+=1
-        if stopped and count > 3:
+            client.publish("tilPc", "Stopped!!")
+        if stopped and found and (count > 3):
             if (previousSonicRead - previousSonicRead2) < 0:
                 sonicDiff = -(previousSonicRead - previousSonicRead2)
             else: sonicDiff = (previousSonicRead - previousSonicRead2)
+            client.publish("tilPc", sonicDiff)
             if (sonicDiff > 10):
                 moveForward(2)
-                stopped = false
+                stopped = False
+                found = False
                 count = 0
         if Touching():
             stop()
@@ -71,17 +77,21 @@ def on_connect(client, userdata, flags, rc):
   client.subscribe("tilEV3")
 
 def on_message(client, userdata, msg):
-  if msg.payload.decode() == "go":
-    moveForward(2)
+  global stopped
+  global found
+  if msg.payload.decode() == "found":
+    found = True
   if msg.payload.decode() == "stop":
     stop()
     stopped = True
   if msg.payload.decode() == "loss":
-    turnLeft(180)
+    turnLeft(175)
     moveForward(2)
-    _sleep((2000-(seeingLeft+seeingRight/2))*0.01)
+    if ((2000-(seeingLeft+seeingRight/2)) > 0):
+        _sleep((2000-(seeingLeft+seeingRight/2))*0.01)
     stop()
-    turnLeft(160)
+    turnLeft(170)
+    client.publish("arduino", "1")
   client.publish("tilPc", "Message Confirm")
 
 def moveForward(time):
