@@ -1,0 +1,36 @@
+script Test targets (LegoMindstormsEV3, EV3_1) {
+	
+	
+	void loop () {
+		
+		Subscribe("tilEV3");
+		StartConnection(); 
+		if (ReceivedMessage("TurnRight")){
+			TurnRight(180);
+		}
+		if (ReceivedMessage("TurnLeft")){
+			TurnLeft(180);
+		}
+		if (ReceivedMessage("MoveForward")){
+			MoveForward(1);
+		}
+		
+		Publish("tilPc","go");
+	
+		}
+	}
+
+
+
+metamethodscollection {
+	meta void Idle(int time);
+	meta void TurnRight(int degrees);
+	meta void TurnLeft(int degrees);
+	meta void MoveForward(int x);
+	meta void MoveBackward(int x);
+	meta void Subscribe(string sub);
+	meta void Publish(string pub, string msg);
+	meta boolean ReceivedMessage(string msg);
+	meta void StartConnection();
+	
+}

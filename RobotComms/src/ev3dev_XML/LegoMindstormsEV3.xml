@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<robot>
+  <setup>
+  	<parsertype>Python</parsertype>
+    <extension>.py</extension>
+	    <globalvariables>
+	      <e name="ev3dev.ev3 as ev3" type="import"/>
+	      <e name="time import sleep as _sleep" type="from"/>
+	      <e name="paho.mqtt.client as mqtt" type="import"/>
+	    </globalvariables>
+	    <method>
+			<setup parameters="" return="void">
+			global rightMotor
+			global rightMotor
+			global leftMotor
+			global touchingLeft
+			global touchingRight
+			global seeingRight
+			global seeingLeft
+			global messageList
+			global subList
+			global connected_flag
+			rightMotor = ev3.LargeMotor('outA')
+			leftMotor = ev3.LargeMotor('outB')
+			rightMotor.reset()
+			leftMotor.reset()
+			touchingLeft = True
+			touchingRight = False
+			seeingRight = False
+			seeingLeft = False
+			messageList = []
+			subList = []
+			global client
+			client = mqtt.Client()
+			connected_flag = False
+			client.on_connect = on_connect
+			client.on_message = on_message
+			client.on_disconnect = on_disconnect
+			
+			</setup>
+			
+		</method>
+		
+  </setup>
+  
+  <metamethods>
+		<ReadSensors parameter="" return="void">global touchingLeft
+		global touchingRight
+		global seeingLeft
+		global seeingRight
+		touchingLeft = ev3.TouchSensor().value()
+		touchingRight = ev3.TouchSensor().value()
+		seeingLeft = ev3.UltrasonicSensor().value() &lt; 120
+		seeingRight = ev3.UltrasonicSensor().value() &lt; 120</ReadSensors>
+		<Touching parameter="" return="bool">global touchingLeft
+		global touchingRight
+		return touchingLeft or touchingRight</Touching>
+		<TouchingBoth parameter="" return="bool">global touchingLeft
+		global touchingRight
+		return touchingLeft and touchingRight</TouchingBoth>
+		<TouchingLeft parameter="" return="bool">global touchingLeft
+		return touchingLeft</TouchingLeft>
+		<TouchingRight parameter="" return="bool">global touchingRight
+		return touchingRight</TouchingRight>
+		<Seeing parameter="" return="bool">global seeingLeft
+		global seeingRight
+		return seeingLeft or seeingRight</Seeing>
+		<SeeingBoth parameter="" return="bool">global seeingLeft
+		global seeingRight
+		return seeingLeft &amp;&amp; seeingRight</SeeingBoth>
+		<SeeingLeft parameter="" return="bool">global seeingLeft
+		return seeingLeft</SeeingLeft>
+		<SeeingRight parameter="" return="bool">global seeingRight
+		return seeingRight</SeeingRight>
+		<MoveForward parameter="int time" return="void">moveForward(time)</MoveForward>
+		<MoveBackward parameter="int time" return="void">moveBackward(time)</MoveBackward>
+		<TurnRight parameter="int degrees" return="void">turnRight(degrees)</TurnRight>
+		<TurnLeft parameter="int degrees" return="void">turnLeft(degrees)</TurnLeft>
+		<Idle parameter="int time" return="void">idle(time)</Idle>
+		<Subscribe parameter="string sub" return="void">subscribe(sub)</Subscribe>
+		<Publish parameter="string top,string msg" return="void">publish(top, msg)</Publish>
+		<ReceivedMessage parameter="string msg" return="bool">return receivedMessage(msg)</ReceivedMessage>
+		<StartConnection parameter="" return="void">startConnection()</StartConnection>
+  </metamethods>
+</robot>

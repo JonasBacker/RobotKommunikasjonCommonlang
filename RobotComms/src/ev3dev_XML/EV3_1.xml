@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<robot>
+	<methods>
+		<main parameter="" return="void">
+		setup()
+		while True:
+			loop()</main>
+			
+		<on_connect parameter="int client,int userdata,int flags,int rc" return="void">
+		global subList
+		global connected_flag
+		print("Connected with result code "+str(rc))
+		if rc==0:
+			connected_flag = True
+		for sub in subList:
+			client.subscribe(sub)
+  		</on_connect>
+  		<on_disconnect parameter="int client,int userdata,int rc" return="void">
+		global connected_flag
+		if rc>0:
+			connected_flag = False
+  		</on_disconnect>
+  		<on_message parameter="int client,int userdata,int msg" return="void">
+		global messageList
+		messageList.append(msg.payload.decode())
+		print("message received "+msg.payload.decode())
+  		</on_message>
+  		<receivedMessage parameter="string msg" return="bool">
+		global messageList
+		if msg in messageList:
+			messageList.remove(msg)
+			return True
+		else:
+			return False
+  		</receivedMessage>
+  		<subscribe parameter="string sub" return="void">
+		global subList
+		if not sub in subList:
+			subList.append(sub)
+		</subscribe>
+		<startConnection parameter="" return="void">
+		global client
+		global connected_flag
+		if not connected_flag:
+			client.connect("192.168.1.4",1883,60)
+			client.loop()
+		while not connected_flag:
+			_sleep(0.1)
+			client.loop()
+		client.loop()
+		</startConnection>
+		<publish parameter="string top,string msg" return="void">
+		client.publish(top,msg)
+		</publish>
+		<moveForward parameter="int time" return="void">
+		global rightMotor
+		global leftMotor
+		rightMotor.run_direct(duty_cycle_sp=75)
+		leftMotor.run_direct(duty_cycle_sp=75)
+		_sleep(time*0.001)</moveForward>
+		<moveBackward parameter="int time" return="void">
+		global rightMotor
+		global leftMotor
+		rightMotor.run_direct(duty_cycle_sp=-75)
+		leftMotor.run_direct(duty_cycle_sp=-75)
+		_sleep(time*0.001)</moveBackward>
+		<turnLeft parameter="int degrees" return="void">
+		global rightMotor
+		global leftMotor
+		rightMotor.run_direct(duty_cycle_sp=37)
+		leftMotor.run_direct(duty_cycle_sp=-37)
+		initial = ev3.GyroSensor().value()
+		while ev3.GyroSensor().value() &lt; initial + degrees :
+			_sleep(0.001)
+		rightMotor.reset()
+		leftMotor.reset()</turnLeft>
+		<turnRight parameter="int degrees" return="void">
+		global rightMotor
+		global leftMotor
+		rightMotor.run_direct(duty_cycle_sp=-37)
+		leftMotor.run_direct(duty_cycle_sp=37)
+		initial = ev3.GyroSensor().value()
+		while ev3.GyroSensor().value() &gt; initial - degrees :
+			_sleep(0.001)
+		rightMotor.reset()
+		leftMotor.reset()</turnRight>
+		<idle parameter="int time" return="void">
+		leftMotor.reset()
+		rightMotor.reset()
+		_sleep(time*0.001)</idle>
+	</methods>
+	<assignments>
+	</assignments>
+</robot>
