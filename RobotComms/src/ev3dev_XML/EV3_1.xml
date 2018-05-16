@@ -70,7 +70,7 @@
 		rightMotor.run_direct(duty_cycle_sp=37)
 		leftMotor.run_direct(duty_cycle_sp=-37)
 		initial = ev3.GyroSensor().value()
-		while ev3.GyroSensor().value() &lt; initial + degrees :
+		while ev3.GyroSensor().value() &gt; initial - degrees :
 			_sleep(0.001)
 		rightMotor.reset()
 		leftMotor.reset()</turnLeft>
@@ -80,7 +80,7 @@
 		rightMotor.run_direct(duty_cycle_sp=-37)
 		leftMotor.run_direct(duty_cycle_sp=37)
 		initial = ev3.GyroSensor().value()
-		while ev3.GyroSensor().value() &gt; initial - degrees :
+		while ev3.GyroSensor().value() &lt; initial + degrees :
 			_sleep(0.001)
 		rightMotor.reset()
 		leftMotor.reset()</turnRight>

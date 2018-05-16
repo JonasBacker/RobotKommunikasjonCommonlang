@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<robot>
+	<methods>
+  		<subscribe parameter="String sub" return="void">
+		bool found = false
+		for (int i = 0; (i&lt;subListSize) &amp;&amp; !found; i++){if(sub.compareTo(subList[i])==0){found = true;
+ 		}} if(!found){ subList[subListSize] = sub
+		subListSize++
+		} int i</subscribe>
+		<receivedMessage parameter="String msg" return="bool">
+		bool found = false
+		for(int i=0;i&lt;messageListSize;i++){if(msg.compareTo(messageList[i])==0){for(int k =i;k&lt;messageListSize-1;k++){if(k != messageListSize-1){messageList[k] = messageList[k+1]
+		}}messageListSize--
+		found = true
+		}}return found
+		</receivedMessage>
+		
+		<publish parameter="String top,String msg" return="void">
+		client.publish(top.c_str(),msg.c_str())
+		</publish>
+		
+		<reconnect parameter="" return="void">
+		while (!client.connected()) { Serial.print("Attempting MQTT connection...")
+		if (client.connect("ESP8266 Client")) { Serial.println("connected")
+		for(int i =0;i&lt;subListSize;i++){ client.subscribe(subList[i].c_str())
+		}} else {Serial.print("failed, rc=")
+		Serial.print(client.state())
+		Serial.println(" try again in 5 seconds")
+		delay(5000)
+		}}int i
+		</reconnect>
+		
+		<startConnection parameter="" return="void">
+		if (!client.connected()) {reconnect()
+		}client.loop()
+		</startConnection>
+		
+		<callback parameter="char* topic,byte* payload,int lengde" return="void">
+		Serial.print("Message arrived [")
+		Serial.print(topic)
+		Serial.print("] ")
+		String word
+		for(int i=0;i&lt;lengde;i++){word += (char)payload[i]
+		} messageList[messageListSize] = word
+		messageListSize++
+		</callback>
+  		<moveForward parameter="int time" return="void">
+		servoLeft.writeMicroseconds(1700)
+		servoRight.writeMicroseconds(1300)
+		delay(time)
+		servoLeft.writeMicroseconds(1500)
+		servoRight.writeMicroseconds(1495)
+		delay(5)</moveForward>
+  		<moveBackward parameter="int time" return="void">
+		servoLeft.writeMicroseconds(1300)
+		servoRight.writeMicroseconds(1700)
+		delay(time)
+		servoLeft.writeMicroseconds(1500)
+		servoRight.writeMicroseconds(1495)
+		delay(5)</moveBackward>
+  		<turnLeft parameter="int degrees" return="void">
+		servoLeft.writeMicroseconds(1453)
+		servoRight.writeMicroseconds(1453)
+		delay(degrees * 14)
+		servoLeft.writeMicroseconds(1500)
+		servoRight.writeMicroseconds(1495)
+		delay(5)
+		</turnLeft>
+		<turnRight parameter="int degrees" return="void">
+		servoLeft.writeMicroseconds(1543)
+		servoRight.writeMicroseconds(1543)
+		delay(degrees * 14)
+		servoLeft.writeMicroseconds(1500)
+		servoRight.writeMicroseconds(1495)
+		delay(5)</turnRight>
+  		<InfraredSensor parameter="int pin,int pout" return="int">
+		tone(pout, 38000, 8)
+		delay(1)
+		int ir = digitalRead(pin)
+		return !(ir)</InfraredSensor>
+  		<WhiskerSensor parameter="int pin" return="int">
+  		delay(1)
+		int w = digitalRead(pin)
+		return !(w)</WhiskerSensor>
+  		<idle parameter="int time" return="void">
+  		servoLeft.writeMicroseconds(1500)
+		servoRight.writeMicroseconds(1495)
+		delay(time)</idle>
+		<lightOn parameter="int pout" return="void">
+		digitalWrite(pout, HIGH)</lightOn>
+		<lightOff parameter="int pout" return="void">
+		digitalWrite(pout, LOW)</lightOff>
+		<scan parameter="" return="int">
+		int blocks = pixy.getBlocks()
+		objectDetected = blocks!=0;
+		x = pixy.blocks[0].x
+		return blocks</scan>
+		<followObject parameter="" return="void">
+		if(pixy.blocks[0].x&lt;100){turnLeft((-(pixy.blocks[0].x-145))/5)
+		}else if(pixy.blocks[0].x&gt;180){turnRight((pixy.blocks[0].x-145)/5)
+		}else{ moveForward(300)
+		} int i</followObject>
+	</methods>
+	<assignments>
+  		<LeftWhisker value="D1"/>
+  		<RightWhisker value="D0"/>
+  		<ServoLeft value="D3"/>
+  		<ServoRight value="D2"/>
+  		<LED value="D8"/>
+  		<LeftInfraredEmitter value="4"/>
+  		<LeftInfraredSensor value="5"/>
+  		<RightInfraredEmitter value="2"/>
+  		<RightInfraredSensor value="3"/>
+	</assignments>
+</robot>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<robot>
+	<setup>
+		<parsertype>C</parsertype>
+		<globalvariables>
+      		<e name="&lt;Servo.h&gt;" type="#include"/>
+      		<e name="&lt;SPI.h&gt;" type="#include"/>
+      		<e name="&lt;Pixy.h&gt;" type="#include"/>
+      		<e name="&lt;EEPROM.h&gt;" type="#include"/>
+      		<e name="&lt;ESP8266WiFi.h&gt;" type="#include"/>
+      		<e name="&lt;PubSubClient.h&gt;" type="#include"/>
+      		<e name="&lt;Wire.h&gt;" type="#include"/>
+      		<e name="&lt;Adafruit_INA219.h&gt;" type="#include"/>
+      		<e name="&lt;string.h&gt;" type="#include"/>
+      		<e name="&lt;String&gt;" type="#include"/>
+      		<e name="pixy;" type="Pixy"/>
+		    <e name="servoRight;" type="Servo"/>
+	  	    <e name="servoLeft;" type="Servo"/>
+	  	    <e name="espClient;" type="WiFiClient"/>
+	  	    <e name="client(espClient);" type="PubSubClient"/>
+      		<e name="touchingLeft;" type="int"/>
+	      	<e name="touchingRight;" type="int"/>
+      		<e name="seeingLeft;" type="int"/>
+      		<e name="seeingRight;" type="int"/>
+      		<e name="objectDetected;" type="bool"/>
+      		<e name="x;" type="int"/>
+      		<e name="subListSize;" type="int"/>
+      		<e name="messageListSize;" type="int"/>
+      		<e name="ssid;" type="const char*"/>
+      		<e name="password;" type="const char*"/>
+      		<e name="mqtt_server;" type="const char*"/>
+      		<e name="messageList[50];" type="String"/>
+      		<e name="subList[50];" type="String"/>
+    	</globalvariables>
+    	<method>
+			<setup parameters="" return="void">
+			servoRight.attach(ServoRight)
+			servoLeft.attach(ServoLeft)
+			pinMode(LED, OUTPUT)
+			x=-1
+			subListSize = 0
+			messageListSize = 0
+			pixy.init()
+			ssid = "MagnusSugeIMarioCart"
+			password = "atiganger"
+			mqtt_server = "192.168.1.4"
+			client.setServer(mqtt_server, 1883)
+			client.setCallback(callback)
+			servoRight.writeMicroseconds(1495)
+			Serial.begin(9600)
+			</setup>
+			
+    	</method>	
+    
+		<extension>.ino</extension>
+	</setup>
+	
+	
+	<metamethods>
+  		<ReadSensors parameter="" return="void">touchingLeft = WhiskerSensor(LeftWhisker)
+		touchingRight = WhiskerSensor(RightWhisker)
+		delay(10)
+		seeingLeft = InfraredSensor(LeftInfraredSensor, LeftInfraredEmitter)
+		delay(10)
+		seeingRight = InfraredSensor(RightInfraredSensor, RightInfraredEmitter)
+		scan()</ReadSensors>
+  		<Touching parameter="" return="bool">return (touchingLeft || touchingRight)</Touching>
+  		<TouchingBoth parameter="" return="bool">return (touchingLeft &amp;&amp; touchingRight)</TouchingBoth>
+  		<TouchingLeft parameter="" return="bool">return touchingLeft</TouchingLeft>
+  		<TouchingRight parameter="" return="bool">return touchingRight</TouchingRight>
+  		<Seeing parameter="" return="bool">return (seeingLeft || seeingRight)</Seeing>
+  		<SeeingBoth parameter="" return="bool">return (seeingLeft &amp;&amp; seeingRight)</SeeingBoth>
+  		<SeeingLeft parameter="" return="bool">return seeingLeft</SeeingLeft>
+  		<SeeingRight parameter="" return="bool">return seeingRight</SeeingRight>
+  		<MoveForward parameter="int time" return="void">moveForward(time)</MoveForward>
+  		<MoveBackward parameter="int time" return="void">moveBackward(time)</MoveBackward>
+  		<TurnRight parameter="int degrees" return="void">turnRight(degrees)</TurnRight>
+  		<TurnLeft parameter="int degrees" return="void">turnLeft(degrees)</TurnLeft>
+  		<Idle parameter="int time" return="void">idle(time)</Idle>
+  		<LightOn parameter="" return="void">lightOn(LED)</LightOn>
+  		<LightOff parameter="" return="void">lightOff(LED)</LightOff>
+  		<FoundObject parameter="" return="bool">return objectDetected</FoundObject>
+  		<FollowObject parameter="" return="void">followObject()</FollowObject>
+  		<Delay parameter="int time" return="void">delay(time)</Delay>
+  		<Subscribe parameter="String sub" return="void">subscribe(sub)</Subscribe>
+		<Publish parameter="String top,String msg" return="void">publish(top, msg)</Publish>
+		<ReceivedMessage parameter="String msg" return="bool">return receivedMessage(msg)</ReceivedMessage>
+		<StartConnection parameter="" return="void">startConnection()</StartConnection>
+	</metamethods>
+</robot>

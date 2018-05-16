@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<robot>
+  <setup>
+  	<parsertype>Python</parsertype>
+    <extension>.py</extension>
+	    <globalvariables>
+	      <e name="RPi.GPIO as GPIO" type="import"/>
+	      <e name="socket" type="import"/>
+		  <e name="paho.mqtt.client as mqtt" type="import"/>
+	      <e name="time as _time" type="import"/>
+	    </globalvariables>
+	    <method>
+			<setup parameters="" return="void">
+			  GPIO.setmode(GPIO.BCM)
+			  global leftMotor
+			  global rightMotor
+			  global messageList
+			  global subList
+			  global connected_flag
+			  messageList = []
+			  subList = []
+			  global client
+			  client = mqtt.Client()
+			  connected_flag = False
+			  client.on_connect = on_connect
+			  client.on_message = on_message
+			  client.on_disconnect = on_disconnect
+			  GPIO.setup(leftMotorPmwPin, GPIO.OUT)
+			  GPIO.setup(rightMotorPmwPin, GPIO.OUT)
+			  leftMotor = GPIO.PWM(leftMotorPmwPin, 10000)
+			  rightMotor = GPIO.PWM(rightMotorPmwPin, 10000)
+			  GPIO.setup(leftMotorEnablePin, GPIO.OUT)
+			  GPIO.setup(rightMotorEnablePin, GPIO.OUT)
+			  GPIO.setup(leftMotorDirectionPin, GPIO.OUT)
+			  GPIO.setup(rightMotorDirectionPin, GPIO.OUT)
+			  GPIO.setup(ultraSonicDistanceSensorTrig, GPIO.OUT)
+			  GPIO.setup(ultraSonicDistanceSensorEcho, GPIO.IN)
+  			</setup>
+		</method>
+  </setup>
+  <metamethods>
+		<MoveForward parameter="int time" return="void">moveForward(time)</MoveForward>
+		<MoveBackward parameter="int time" return="void">moveBackward(time)</MoveBackward>
+		<TurnRight parameter="int degrees" return="void">turnRight(degrees)</TurnRight>
+		<TurnLeft parameter="int degrees" return="void">turnLeft(degrees)</TurnLeft>
+		<Idle parameter="int time" return="void">idle(time)</Idle>
+		<PrintOut parameter="string s" return="void">printOut(s)</PrintOut>
+		<GetDistance parameter="" return="string">return getDistance()</GetDistance>
+		<SendMessage parameter="string mac, string message" return="void">sendMessage(mac, message)</SendMessage>
+		<Subscribe parameter="string sub" return="void">subscribe(sub)</Subscribe>
+		<Publish parameter="string top,string msg" return="void">publish(top, msg)</Publish>
+		<ReceivedMessage parameter="string msg" return="bool">return receivedMessage(msg)</ReceivedMessage>
+		<StartConnection parameter="" return="void">startConnection()</StartConnection>
+  </metamethods>
+</robot>

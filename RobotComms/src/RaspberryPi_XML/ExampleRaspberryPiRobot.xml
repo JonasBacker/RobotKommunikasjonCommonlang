@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<robot>
+	<methods>
+		<main parameter="" return="void">
+		setup()
+		try:
+			GPIO.output(leftMotorEnablePin, 1)
+			GPIO.output(rightMotorEnablePin, 1)
+			GPIO.output(leftMotorDirectionPin, 0)
+			GPIO.output(rightMotorDirectionPin, 0)
+			start()
+		finally:
+			leftMotor.stop()
+			rightMotor.stop()
+			GPIO.output(leftMotorEnablePin, 0)
+			GPIO.output(rightMotorEnablePin, 0)
+			GPIO.cleanup()
+		</main>
+		<moveForward parameter="int time" return="void">
+			leftMotor.start(50)
+			rightMotor.start(50)
+			_time.sleep(time * 0.001)
+			leftMotor.stop()
+			rightMotor.stop()
+		</moveForward>
+		<moveBackward parameter="int time" return="void">
+			GPIO.output(leftMotorDirectionPin, 1)
+			GPIO.output(rightMotorDirectionPin, 1)
+			leftMotor.start(50)
+			rightMotor.start(50)
+			_time.sleep(time * 0.001)
+			leftMotor.stop()
+			rightMotor.stop()
+			GPIO.output(leftMotorDirectionPin, 0)
+			GPIO.output(rightMotorDirectionPin, 0)
+		</moveBackward>
+		<turnRight parameter="int degrees" return="void">
+			GPIO.output(rightMotorDirectionPin, 1)
+			leftMotor.start(50)
+			rightMotor.start(50)
+			_time.sleep(degrees * 0.02)
+			leftMotor.stop()
+			rightMotor.stop()
+			GPIO.output(rightMotorDirectionPin, 0)
+		</turnRight>
+		<turnLeft parameter="int degrees" return="void">
+			GPIO.output(leftMotorDirectionPin, 1)
+			leftMotor.start(50)
+			rightMotor.start(50)
+			_time.sleep(degrees * 0.02)
+			leftMotor.stop()
+			rightMotor.stop()
+			GPIO.output(leftMotorDirectionPin, 0)
+		</turnLeft>
+		<idle parameter="int time" return="void">
+			_time.sleep(time * 0.001)
+		</idle>
+		<getDistance parameter="" return="string">
+			GPIO.output(17, 1)
+			_time.sleep(0.00001)
+			GPIO.output(17, 0)
+			StartTime = _time.time()
+			StopTime = _time.time()
+			while (GPIO.input(18) == 0):
+				StartTime = _time.time()
+			while (GPIO.input(18) == 1):
+				StopTime = _time.time()
+			TimeElapsed = StopTime - StartTime
+			distance = (TimeElapsed * 34300) / 2
+			return distance
+		</getDistance>
+		<printOut parameter="string s" return="void">
+			print(s)
+		</printOut>
+		<sendMessage parameter="string mac, string message" return="void">
+			s = socket.socket()
+			host = socket.gethostname()
+			port = 12345
+			s.bind((host, port))
+			s.listen(5)
+			while True:
+			   c, addr = s.accept()
+			   print 'Got connection from', addr
+			   c.send('Thank you for connecting')
+			   c.close()
+		</sendMessage>
+		
+		<on_connect parameter="int client,int userdata,int flags,int rc" return="void">
+			global subList
+			global connected_flag
+			print("Connected with result code "+str(rc))
+			if rc==0:
+				connected_flag = True
+			for sub in subList:
+				client.subscribe(sub)
+  		</on_connect>
+  		<on_disconnect parameter="int client,int userdata,int rc" return="void">
+			global connected_flag
+			if rc>0:
+				connected_flag = False
+  		</on_disconnect>
+  		<on_message parameter="int client,int userdata,int msg" return="void">
+			global messageList
+			messageList.append(msg.payload.decode())
+			print("message received "+msg.payload.decode())
+  		</on_message>
+  		<receivedMessage parameter="string msg" return="bool">
+			global messageList
+			if msg in messageList:
+				messageList.remove(msg)
+				return True
+			else:
+				return False
+  		</receivedMessage>
+  		<subscribe parameter="string sub" return="void">
+			global subList
+			if not sub in subList:
+				subList.append(sub)
+		</subscribe>
+		<startConnection parameter="" return="void">
+			global client
+			global connected_flag
+			if not connected_flag:
+				client.connect("192.168.1.4",1883,60)
+				client.loop()
+			while not connected_flag:
+				_time.sleep(0.1)
+				client.loop()
+			client.loop()
+		</startConnection>
+		<publish parameter="string top,string msg" return="void">
+			client.publish(top,msg)
+		</publish>
+		
+	</methods>
+	<assignments>
+		<leftMotorPmwPin value="12"/>
+		<rightMotorPmwPin value="13"/>
+		<leftMotorEnablePin value="22"/>
+		<rightMotorEnablePin value="23"/>
+		<leftMotorDirectionPin value="24"/>
+		<rightMotorDirectionPin value="25"/>
+		<ultraSonicDistanceSensorTrig value="17"/>
+		<ultraSonicDistanceSensorEcho value="18"/>
+	</assignments>
+</robot>
